@@ -1,0 +1,14 @@
+{
+  "projects": [
+    {
+      "name": "Project-A",
+      "notion_database_id": "YOUR_PROJECT_A_DATABASE_ID_HERE",
+      "slack_webhook_url": "YOUR_PROJECT_A_SLACK_WEBHOOK_URL_HERE"
+    },
+    {
+      "name": "Project-B",
+      "notion_database_id": "YOUR_PROJECT_B_DATABASE_ID_HERE",
+      "slack_webhook_url": "YOUR_PROJECT_B_SLACK_WEBHOOK_URL_HERE"
+    }
+  ]
+}

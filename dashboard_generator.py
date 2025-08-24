@@ -1,24 +1,16 @@
 import logging
 
 class DashboardGenerator:
-    def generate(self, spec_updater):
-        """
-        Generates a simple text-based dashboard and prints it to the console.
-        """
-        logging.info("Generating dashboard...")
+    def _get_project_data(self, spec_updater):
+        """Fetches and categorizes specs for a single project."""
+        project_dashboard = {"Approved": [], "Draft": [], "Other": []}
         try:
-            # Re-using the query logic from the spec_updater.
-            # Note: The user's provided code had this logic here, but it's better
-            # to call a method on the updater if one exists. Let's assume we might
-            # refactor later and for now, we query directly as per the user's snippet.
-            results = spec_updater.notion.databases.query(database_id=spec_updater.database_id).get("results", [])
+            results = spec_updater.notion.databases.query(
+                database_id=spec_updater.database_id
+            ).get("results", [])
         except Exception as e:
-            logging.error(f"Failed to query Notion database for dashboard: {e}")
-            return
-
-        approved = []
-        drafts = []
-        other_statuses = []
+            logging.error(f"Failed to query database {spec_updater.database_id}: {e}")
+            return project_dashboard
 
         for page in results:
             properties = page.get("properties", {})
@@ -33,35 +25,47 @@ class DashboardGenerator:
             entry = f"{name} v{version}"
 
             if status == "Approved":
-                approved.append(entry)
+                project_dashboard["Approved"].append(entry)
             elif status == "Draft":
-                drafts.append(entry)
+                project_dashboard["Draft"].append(entry)
             else:
-                other_statuses.append(f"{entry} ({status})")
+                project_dashboard["Other"].append(f"{entry} ({status})")
+        return project_dashboard
 
-        # Print the dashboard to the console
-        print("\n" + "="*20)
-        print("=== PROJECT DASHBOARD ===")
-        print("="*20)
+    def generate_integrated(self, spec_updaters: list, project_configs: list):
+        """
+        Generates an integrated dashboard for multiple projects.
+        """
+        logging.info("Generating integrated dashboard...")
 
-        print("\n--- ✅ Approved Specs ---")
-        if approved:
-            for a in approved:
-                print(f" - {a}")
-        else:
-            print(" (None)")
+        print("\n" + "="*30)
+        print("=== INTEGRATED DASHBOARD ===")
+        print("="*30)
 
-        print("\n--- 📝 Draft Specs ---")
-        if drafts:
-            for d in drafts:
-                print(f" - {d}")
-        else:
-            print(" (None)")
+        for i, updater in enumerate(spec_updaters):
+            project_name = project_configs[i].get("name", f"Project {i+1}")
+            print(f"\n--- Project: {project_name} ---")
 
-        if other_statuses:
-            print("\n--- 📊 Other Statuses ---")
-            for o in other_statuses:
-                print(f" - {o}")
+            data = self._get_project_data(updater)
 
-        print("\n" + "="*20)
-        logging.info("Dashboard generation complete.")
+            print("  ✅ Approved Specs:")
+            if data["Approved"]:
+                for item in data["Approved"]:
+                    print(f"    - {item}")
+            else:
+                print("    (None)")
+
+            print("  📝 Draft Specs:")
+            if data["Draft"]:
+                for item in data["Draft"]:
+                    print(f"    - {item}")
+            else:
+                print("    (None)")
+
+            if data["Other"]:
+                print("  📊 Other Statuses:")
+                for item in data["Other"]:
+                    print(f"    - {item}")
+
+        print("\n" + "="*30)
+        logging.info("Integrated dashboard generation complete.")

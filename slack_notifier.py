@@ -4,11 +4,15 @@ from dotenv import load_dotenv
 import logging
 
 class SlackNotifier:
-    def __init__(self):
-        load_dotenv()
-        self.webhook_url = os.getenv("SLACK_WEBHOOK_URL")
+    def __init__(self, webhook_url: str):
+        """
+        Initializes the Slack notifier.
+        The webhook URL is passed in to make the class reusable for
+        different projects/channels.
+        """
+        self.webhook_url = webhook_url
         if not self.webhook_url:
-            logging.warning("SLACK_WEBHOOK_URL is not set. Slack notifications will be disabled.")
+            logging.warning("SlackNotifier initialized with no webhook URL. Notifications will be disabled.")
 
     def send_message(self, message):
         if not self.webhook_url:

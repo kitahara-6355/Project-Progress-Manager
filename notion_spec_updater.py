@@ -3,10 +3,19 @@ from notion_client import Client
 from dotenv import load_dotenv
 
 class NotionSpecUpdater:
-    def __init__(self):
+    def __init__(self, database_id: str):
+        """
+        Initializes the Notion client.
+        The API token is loaded from the environment, but the database ID
+        is passed in to make the class reusable for multiple projects.
+        """
         load_dotenv()
-        self.notion = Client(auth=os.getenv("NOTION_API_TOKEN"))
-        self.database_id = os.getenv("NOTION_DATABASE_ID")
+        api_token = os.getenv("NOTION_API_TOKEN")
+        if not api_token:
+            raise ValueError("NOTION_API_TOKEN is not set in the .env file.")
+
+        self.notion = Client(auth=api_token)
+        self.database_id = database_id
 
     def add_spec(self, name, version, content, changelog, status):
         new_page_properties = {
