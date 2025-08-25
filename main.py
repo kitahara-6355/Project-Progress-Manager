@@ -90,6 +90,17 @@ def process_project(project_config: dict):
         except Exception as e:
             logging.error(f"[{project_name}] Failed to update spec status to 'Fail'. Reason: {e}")
 
+    # 4. Log the result to the history database
+    try:
+        details = f"Test Command: {test_command}\n\nOutput:\n{test_output}"
+        spec_updater.add_history_entry(
+            project_name=project_name,
+            status=test_status,
+            details=details
+        )
+    except Exception as e:
+        logging.error(f"[{project_name}] Failed to log run to history database. Reason: {e}")
+
     logging.info(f"--- Finished processing for project: {project_name} ---")
     return spec_updater
 

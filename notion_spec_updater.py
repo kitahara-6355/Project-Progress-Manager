@@ -1,6 +1,7 @@
 import os
 from notion_client import Client
 from dotenv import load_dotenv
+from datetime import datetime
 
 class NotionSpecUpdater:
     def __init__(self, database_id: str):
@@ -16,6 +17,7 @@ class NotionSpecUpdater:
 
         self.notion = Client(auth=api_token)
         self.database_id = database_id
+        self.history_db_id = os.getenv("NOTION_HISTORY_DB_ID")
 
     def add_spec(self, name, version, content, changelog, status):
         new_page_properties = {
@@ -70,3 +72,35 @@ class NotionSpecUpdater:
                 if title == name:
                     return page
         return None
+
+    def add_history_entry(self, project_name: str, status: str, details: str):
+        """
+        Adds a new entry to the test run history database.
+
+        Assumes the history database has the following properties:
+        - 'Project Name' (Title)
+        - 'Timestamp' (Date)
+        - 'Status' (Rich Text or Select)
+        - 'Details' (Rich Text)
+        """
+        if not self.history_db_id:
+            # Silently fail if no history DB is configured.
+            return
+
+        now_utc = datetime.utcnow().isoformat()
+
+        new_history_page = {
+            "Project Name": {"title": [{"text": {"content": project_name}}]},
+            "Timestamp": {"date": {"start": now_utc}},
+            "Status": {"rich_text": [{"text": {"content": status}}]},
+            "Details": {"rich_text": [{"text": {"content": details[:2000]}}]} # Limit details to Notion's max property size
+        }
+
+        try:
+            self.notion.pages.create(
+                parent={"database_id": self.history_db_id},
+                properties=new_history_page
+            )
+        except Exception as e:
+            # Log the error but don't let it crash the main workflow
+            print(f"Error: Failed to add entry to history database. Reason: {e}")
