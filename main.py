@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import concurrent.futures
 from notion_spec_updater import NotionSpecUpdater
 from slack_notifier import SlackNotifier
 from dashboard_generator import DashboardGenerator
@@ -83,16 +84,33 @@ def main():
         config = json.load(f)
 
     project_configs = config.get("projects", [])
-    all_updaters = []
-    for project in project_configs:
-        updater = process_project(project)
-        if updater:
-            all_updaters.append(updater)
+    processed_results = [] # Will store tuples of (updater, config)
 
-    # 4. Generate the integrated dashboard for all processed projects
-    if all_updaters:
+    # Use ThreadPoolExecutor to process projects in parallel
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        # Create a mapping from future to project config
+        future_to_project = {executor.submit(process_project, proj): proj for proj in project_configs}
+
+        logging.info(f"Submitted {len(future_to_project)} projects for processing.")
+
+        for future in concurrent.futures.as_completed(future_to_project):
+            project_config = future_to_project[future]
+            try:
+                # Get the result (the spec_updater instance) from the future
+                updater_instance = future.result()
+                if updater_instance:
+                    # Store the successful result along with its config
+                    processed_results.append((updater_instance, project_config))
+            except Exception as exc:
+                logging.error(f"Project '{project_config.get('name')}' generated an exception: {exc}")
+
+    # 4. Generate the integrated dashboard from the successfully processed projects
+    if processed_results:
+        # Unzip the results into separate lists for the dashboard generator
+        successful_updaters, successful_configs = zip(*processed_results)
+
         dashboard = DashboardGenerator()
-        dashboard.generate_integrated(all_updaters, project_configs)
+        dashboard.generate_integrated(list(successful_updaters), list(successful_configs))
 
     logging.info("All projects processed.")
 
