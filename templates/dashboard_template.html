@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>進捗ダッシュボード</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 40px;
+            background-color: #f7f7f7;
+            color: #333;
+        }
+        h1 {
+            color: #111;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .summary {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+    <h1>データソース進捗ダッシュボード</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ファイル名</th>
+                <th>内容サマリー</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in sources %}
+            <tr>
+                <td>{{ item.file }}</td>
+                <td class="summary">{{ item.content[:200]|replace('\n', ' ') }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="2">データソースが見つかりませんでした。</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
