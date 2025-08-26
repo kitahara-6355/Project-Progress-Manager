@@ -2,58 +2,53 @@
 
 ## 概要 (Overview)
 
-このプロジェクトは、ローカルのファイル（`.html`, `.txt`）をデータソースとして自動的に収集・処理し、その結果をNotionデータベースに記録し、HTML形式のダッシュボードを生成する自動化ツールです。処理の進捗状況はSlackにも通知されます。
+このプロジェクトは、日々の情報収集や進捗報告における手作業を自動化し、業務効率を劇的に向上させるためのツールです。
 
-This project is an automation tool that automatically collects and processes local files (`.html`, `.txt`) as data sources, records the results in a Notion database, and generates an HTML dashboard. The progress of the processing is also notified to Slack.
+当初、「散在するファイル情報を手作業でまとめてNotionに報告するのが大変...」「進捗状況をリアルタイムで把握したい」という課題を解決するために開発がスタートしました。
 
-## 主な機能 (Features)
+現在のシステムでは、指定したフォルダにあるファイルを自動で収集し、内容を整理してNotionに記録、視覚的なHTMLダッシュボードを生成し、一連の進捗をSlackに通知します。これにより、情報の抜け漏れを防ぎ、いつでも正確な状況を把握することが可能になります。
 
-- **データ収集 (Data Fetching):** `data/` ディレクトリ内のファイルを自動的にスキャンして内容を読み込みます。
-- **Notion連携 (Notion Integration):** 実行ごとに、指定されたNotionデータベースに新しい行（ページ）として結果を記録します。
-- **Slack通知 (Slack Notifications):** ワークフローの各ステップ（データ取得、Notion更新、ダッシュボード生成）の完了やエラーを、指定されたSlackチャンネルに通知します。
-- **HTMLダッシュボード生成 (HTML Dashboard Generation):** 処理したファイルの一覧を含む、見やすいHTML形式のレポートを `dashboard/` ディレクトリに生成します。
-- **設定ファイルによる管理 (Configuration-driven):** `config.py` ファイルでNotionやSlackのAPIキー、各種設定を集中管理します。
+## このツールでできること (What This Tool Does)
+
+-   **HTML / テキストファイルの自動取り込み:** `data/` フォルダ内のファイルを自動で読み込み、内容を整理します。
+-   **Notionへの自動記録:** 実行ごとに、新しいページを作成し、取り込んだデータを自動で記録します。
+-   **HTMLダッシュボードの生成:** 視覚的に進捗や処理結果を確認できるダッシュボードを生成します。
+-   **Slack通知:** 進捗状況や処理結果、エラーを指定されたチャンネルに自動で送信します。
+-   **ログ記録:** `logs/app.log` に処理の詳細な状況やエラーを保存し、トラブルシューティングを容易にします。
+
+## 自動化によるメリット (Benefits of Automation)
+
+| メリット                  | 内容                                                     |
+| ------------------------- | -------------------------------------------------------- |
+| **時間削減**              | 手作業でファイルを整理・報告する必要がなくなります。       |
+| **情報の正確性向上**      | データの抜け漏れや手動での記録ミスを防ぎます。           |
+| **進捗把握の即時性**      | Notion、ダッシュボード、Slackでリアルタイムに状況を確認できます。 |
+| **確認の容易さ**          | HTMLダッシュボードで全体状況を一目で把握できます。       |
+| **トラブル対応の効率化**  | ログ記録により、エラー原因の特定が簡単になります。       |
 
 ## プロジェクト構造 (Project Structure)
 
 ```
 .
-├── config.py               # 設定ファイル (APIキーなど)
-├── main.py                 # メイン実行スクリプト
-├── fetch_data.py           # データ収集モジュール
-├── update_notion.py        # Notion更新モジュール
-├── slack_notify.py         # Slack通知モジュール
-├── generate_dashboard.py   # ダッシュボード生成モジュール
-├── requirements.txt        # 依存ライブラリ
+├── config.py
+├── main.py
+├── fetch_data.py
+├── update_notion.py
+├── slack_notify.py
+├── generate_dashboard.py
+├── requirements.txt
 ├── templates/
-│   └── dashboard_template.html # ダッシュボードのHTMLテンプレート
-├── data/                   # 処理対象のファイルを置く場所
-├── dashboard/              # 生成されたHTMLダッシュボードが保存される場所
-└── logs/                   # 実行ログが保存される場所
+│   └── dashboard_template.html
+├── data/
+├── dashboard/
+└── logs/
 ```
 
 ## クイックスタート (Quick Start)
 
-1.  **リポジトリをクローンします。**
-    ```bash
-    git clone <repository_url>
-    cd <repository_directory>
-    ```
+1.  **依存関係をインストール:** `pip install -r requirements.txt`
+2.  **設定ファイルを編集:** `config.py` を開き、ご自身のNotion/Slack情報を設定します。
+3.  **データファイルを配置:** `data/` ディレクトリに、処理したいファイルを置きます。
+4.  **スクリプトを実行:** `python main.py`
 
-2.  **依存関係をインストールします。**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-3.  **設定ファイルを編集します。**
-    - `config.py` を開き、ご自身の `NOTION_TOKEN`, `NOTION_DATABASE_ID`, `SLACK_WEBHOOK_URL` を設定します。
-
-4.  **データファイルを配置します。**
-    - `data/` ディレクトリに、処理したい `.html` または `.txt` ファイルを置きます。
-
-5.  **スクリプトを実行します。**
-    ```bash
-    python main.py
-    ```
-
-より詳細な手順については、`USAGE_GUIDE.md` を参照してください。
+詳細な手順については、`USAGE_GUIDE.md` を参照してください。
